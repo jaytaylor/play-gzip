@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="play-gzip" default="build" basedir=".">
+
+    <path id="project.classpath">
+        <fileset dir="${play.path}/framework">
+            <include name="*.jar" />
+        </fileset>
+        <fileset dir="${play.path}/framework/lib">
+            <include name="*.jar" />
+        </fileset>
+        <fileset dir="${play.path}/modules/scala-0.9.1/lib">
+            <include name="*.jar" />
+        </fileset>
+        <fileset dir="lib">
+            <include name="*.jar" />
+        </fileset>
+        <pathelement path="tmp/classes" />
+    </path>
+
+
+    <target name="clean">
+        <delete dir="tmp" />
+        <delete file="lib/play-gzip-0.1.jar" />
+        <delete dir="lib" />
+        <mkdir dir="lib" />
+    </target>
+
+    <target name="build" depends="clean">
+        <taskdef resource="scala/tools/ant/antlib.xml">
+            <classpath refid="project.classpath" />
+        </taskdef>
+
+        <mkdir dir="tmp/classes" />
+
+        <scalac srcdir="src" destdir="tmp/classes" force="changed">
+            <classpath refid="project.classpath" />
+        </scalac>
+
+        <javac srcdir="src" destdir="tmp/classes" debug="true" includeantruntime="false">
+            <classpath refid="project.classpath" />
+        </javac>
+
+        <copy todir="tmp/classes">
+            <fileset dir="src">
+                <include name="**/*.properties" />
+                <include name="**/*.xml" />
+                <include name="**/play.plugins" />
+            </fileset>
+        </copy>
+
+        <jar destfile="lib/play-gzip-0.1.jar" basedir="tmp/classes">
+            <manifest>
+                <section name="Play-module">
+                    <attribute name="Specification-Title" value="play-gzip"/>
+                </section>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="test" depends="build">
+        <echo message="Using ${play.path}/play" />
+        <delete dir="${basedir}/samples-and-tests/just-test-cases/tmp" />
+
+        <antcall target="play-test">
+            <param name="testAppPath" value="${basedir}/samples-and-tests/just-test-cases" />
+        </antcall>
+
+        <echo message="****************" />
+        <echo message="All test passed!" />
+        <echo message="****************" />
+    </target>
+
+   <target name="play-test">
+        <echo message="${play.path}/play auto-test ${testAppPath} (wait)" />
+        <exec executable="${play.path}/play" failonerror="true">
+            <arg value="clean" />
+            <arg value="${testAppPath}" />
+        </exec>
+        <exec executable="${play.path}/play" failonerror="true">
+            <arg value="auto-test" />
+            <arg value="${testAppPath}" />
+        </exec>
+        <available file="${testAppPath}/test-result/result.passed" property="${testAppPath}testPassed" />
+        <fail message="Last test has failed ! (Check results in file://${testAppPath}/test-result)">
+            <condition>
+                <not>
+                    <isset property="${testAppPath}testPassed" />
+                </not>
+            </condition>
+        </fail>
+    </target>
+</project>

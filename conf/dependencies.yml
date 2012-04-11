@@ -1,0 +1,5 @@
+self: play -> gzip 0.1
+
+require:
+    - play [1.2.4,)
+    - play -> scala 0.9.1

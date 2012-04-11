@@ -1,0 +1,7 @@
+*.iml
+*.jar
+/documentation
+/dist
+/lib
+/modules
+/tmp
