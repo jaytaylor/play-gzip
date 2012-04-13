@@ -19,29 +19,33 @@ e.g. [play-1.2.4][].
 
 ## Adding the plugin to your project
 
-First, add the gzip dependency and repository to `conf/dependencies.yml`:
+First, add the gzip dependency and repository details to `conf/dependencies.yml`:
 
     require:
         - play
-        - play -> gzip 0.1
+        - play-gzip -> gzip 0.1
 
     repositories:
         - play-gzip:
-            type: http
-            artifact: "https://github.com/jaytaylor/jaytaylor-mvn-repo/raw/master/releases/play/[module]/[revision]/[module]-[revision].[ext]"
+            type: chain
+            using:
+                - snapshot:
+                    type: http
+                    descriptor: "https://github.com/jaytaylor/jaytaylor-mvn-repo/raw/master/releases/[organization]/[module]/[revision]/ivy-[revision].xml"
+                    artifact:   "https://github.com/jaytaylor/jaytaylor-mvn-repo/raw/master/releases/[organization]/[module]/[revision]/[module]-[revision].zip"
             contains:
-                - play -> *
+                - play-gzip
 
-and run `play deps --sync --verbose` to retrieve the module.
+Then run `play deps --sync --verbose` to retrieve the module.
 
-Then you're ready to integrate GZIP support into your application!  This is as
-simple as adding an import statement and extending the controller class with the
-`Compress` trait.  For DRY purposes, this should usually be a base controller
+You are now ready to integrate GZIP support into your application!  This is as
+simple as adding an import statement and extending your controller with the
+`Compress` trait.  For DRY purposes, this should probably be a base controller
 trait which gets inherited by all other controllers.
 
     import play.modules.gzip.Compress
 
-    class MyBaseControllerTrait extends Compress { ... }
+    trait MyBaseControllerTrait extends Compress { ... }
 
 
 ## Configuration
